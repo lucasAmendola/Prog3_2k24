@@ -6,47 +6,47 @@ public class GrafoDirigido<T> implements Grafo<T> {
     private int cantArcos;
 
     //hash map, contiene un vertice (clave int), y un array de sus arcos
-    private HashMap<Integer, ArrayList<Arco<T>>> listVertices;
-    private HashMap<Integer, String> listVerticesBFS;
+    private HashMap<Integer, ArrayList<Arco<T>>> vertexHashMap;
+    private HashMap<Integer, String> visitedHashMap;
 
     public GrafoDirigido() {
         this.cantArcos = 0;
-        this.listVertices = new HashMap<Integer, ArrayList<Arco<T>>>();
-        this.listVerticesBFS = new HashMap<Integer, String>();
+        this.vertexHashMap = new HashMap<Integer, ArrayList<Arco<T>>>();
+        this.visitedHashMap = new HashMap<Integer, String>();
     }
     @Override
     public void agregarVertice(int verticeId) {
         ArrayList<Arco<T>> arcos = new ArrayList<>();
-        this.listVertices.put(verticeId, arcos);
+        this.vertexHashMap.put(verticeId, arcos);
     }
 
     @Override
     public void borrarVertice(int verticeId) {
-        if(this.listVertices.containsKey(verticeId)){
-            this.listVertices.remove(verticeId);
+        if(this.vertexHashMap.containsKey(verticeId)){
+            this.vertexHashMap.remove(verticeId);
         }
     }
 
     @Override
     public void agregarArco(int verticeId1, int verticeId2, T etiqueta) {
-        if(this.listVertices.containsKey(verticeId1) && this.listVertices.containsKey(verticeId2)){
-            Arco<T> arcoNuevo = new Arco<T>(verticeId1,verticeId2,etiqueta);
-            this.listVertices.get(verticeId1).add(arcoNuevo);
+        if(this.vertexHashMap.containsKey(verticeId1) && this.vertexHashMap.containsKey(verticeId2)){
+            Arco<T> arcoNuevo = new Arco<T>(verticeId1,verticeId2,etiqueta, verticeId2);
+            this.vertexHashMap.get(verticeId1).add(arcoNuevo);
             this.cantArcos = this.cantArcos + 1;
         }
     }
 
     @Override
     public void borrarArco(int verticeId1, int verticeId2) {
-        if(listVertices.containsKey(verticeId1)){
-            listVertices.get(verticeId1).remove(this.obtenerArco(verticeId1,verticeId2));
+        if(vertexHashMap.containsKey(verticeId1)){
+            vertexHashMap.get(verticeId1).remove(this.obtenerArco(verticeId1,verticeId2));
             cantArcos--;
         }
     }
 
     @Override
     public boolean contieneVertice(int verticeId) {
-        return this.listVertices.containsKey(verticeId);
+        return this.vertexHashMap.containsKey(verticeId);
     }
 
     @Override
@@ -56,9 +56,9 @@ public class GrafoDirigido<T> implements Grafo<T> {
 
     @Override
     public Arco<T> obtenerArco(int verticeId1, int verticeId2) {
-        if(this.listVertices.containsKey(verticeId1)){
-            ArrayList<Arco<T>> arcos = this.listVertices.get(verticeId1);
-            Arco<T> arcoBuscado = new Arco<>(verticeId1,verticeId2,null);
+        if(this.vertexHashMap.containsKey(verticeId1)){
+            ArrayList<Arco<T>> arcos = this.vertexHashMap.get(verticeId1);
+            Arco<T> arcoBuscado = new Arco<>(verticeId1,verticeId2,null, 12);
             if(arcos != null && arcos.contains(arcoBuscado)){
                 return arcos.get(arcos.indexOf(arcoBuscado));
             }
@@ -69,7 +69,7 @@ public class GrafoDirigido<T> implements Grafo<T> {
 
     @Override
     public int cantidadVertices() {
-        return this.listVertices.size();
+        return this.vertexHashMap.size();
     }
 
     @Override
@@ -79,13 +79,13 @@ public class GrafoDirigido<T> implements Grafo<T> {
 
     @Override
     public Iterator<Integer> obtenerVertices() {
-        Iterator<Integer> vertices = this.listVertices.keySet().iterator();
+        Iterator<Integer> vertices = this.vertexHashMap.keySet().iterator();
         return vertices;
     }
 
     @Override
     public Iterator<Integer> obtenerAdyacentes(int verticeId) {
-        if(this.listVertices.containsKey(verticeId)){
+        if(this.vertexHashMap.containsKey(verticeId)){
             ArrayList<Integer> adyacentes = new ArrayList<>();
             Iterator<Arco<T>> iteratorArcos = this.obtenerArcos(verticeId);
             while (iteratorArcos.hasNext()) {
@@ -101,7 +101,7 @@ public class GrafoDirigido<T> implements Grafo<T> {
     public Iterator<Arco<T>> obtenerArcos() {
         ArrayList<Arco<T>> nueva = new ArrayList<Arco<T>>();
 
-        for (Map.Entry<Integer, ArrayList<Arco<T>>> entrada : this.listVertices.entrySet()){
+        for (Map.Entry<Integer, ArrayList<Arco<T>>> entrada : this.vertexHashMap.entrySet()){
 
             for (Arco<T> arco : entrada.getValue()) {
                 nueva.add(arco);
@@ -113,23 +113,23 @@ public class GrafoDirigido<T> implements Grafo<T> {
 
     @Override
     public Iterator<Arco<T>> obtenerArcos(int verticeId) {
-        return this.listVertices.get(verticeId).iterator();
+        return this.vertexHashMap.get(verticeId).iterator();
     }
 
     public ArrayList<Integer> DFS(){
         ArrayList<Integer> camino = new ArrayList<>();
-        Iterator<Integer> vertices = this.listVerticesBFS.keySet().iterator();
+        Iterator<Integer> vertices = this.visitedHashMap.keySet().iterator();
 
         while (vertices.hasNext()){
                int vertice = vertices.next();
-               listVerticesBFS.put(vertice, "blanco");
+               visitedHashMap.put(vertice, "blanco");
         }
 
-        vertices = this.listVerticesBFS.keySet().iterator();
+        vertices = this.visitedHashMap.keySet().iterator();
 
         while (vertices.hasNext()){
             int vertice = vertices.next();
-            if(listVerticesBFS.get(vertice) == "blanco"){
+            if(visitedHashMap.get(vertice) == "blanco"){
                 DFS(vertice, camino);
             }
         }
@@ -137,13 +137,13 @@ public class GrafoDirigido<T> implements Grafo<T> {
     }
 
     private void DFS(int vertice, ArrayList<Integer> camino) {
-        this.listVerticesBFS.put(vertice, "amarillo");
+        this.visitedHashMap.put(vertice, "amarillo");
         camino.add(vertice);
         Iterator<Integer> adyacentes = this.obtenerAdyacentes(vertice);
 
         while (adyacentes.hasNext()){
             int vAdyacente = adyacentes.next();
-            if(this.listVerticesBFS.get(vAdyacente) == "blanco"){
+            if(this.visitedHashMap.get(vAdyacente) == "blanco"){
                 DFS(vAdyacente, camino);
             }
         }
@@ -154,19 +154,19 @@ public class GrafoDirigido<T> implements Grafo<T> {
 
     public boolean tieneCiclo(){
         ArrayList<Integer> camino = new ArrayList<>();
-        Iterator<Integer> vertices = this.listVerticesBFS.keySet().iterator();
+        Iterator<Integer> vertices = this.visitedHashMap.keySet().iterator();
         Boolean ciclo = false;
 
         while (vertices.hasNext()){
             int vertice = vertices.next();
-            listVerticesBFS.put(vertice, "blanco");
+            visitedHashMap.put(vertice, "blanco");
         }
 
-        vertices = this.listVerticesBFS.keySet().iterator();
+        vertices = this.visitedHashMap.keySet().iterator();
 
         while (vertices.hasNext()){
             int vertice = vertices.next();
-            if(listVerticesBFS.get(vertice) == "blanco"){
+            if(visitedHashMap.get(vertice) == "blanco"){
                  tieneCiclo(vertice, camino, ciclo);
             }
         }
@@ -174,18 +174,20 @@ public class GrafoDirigido<T> implements Grafo<T> {
     }
 
     private void tieneCiclo(int vertice, ArrayList<Integer> camino, Boolean ciclo) {
-        this.listVerticesBFS.put(vertice, "amarillo");
+        this.visitedHashMap.put(vertice, "amarillo");
         camino.add(vertice);
         Iterator<Integer> adyacentes = this.obtenerAdyacentes(vertice);
 
         while (adyacentes.hasNext()){
             int vAdyacente = adyacentes.next();
-            if(this.listVerticesBFS.get(vAdyacente) == "blanco"){
+            if(this.visitedHashMap.get(vAdyacente) == "blanco"){
                 tieneCiclo(vAdyacente, camino, ciclo);
             }
             else
                 ciclo = true;
-        }
+                return;
+        } 
+        this.visitedHashMap.put(vertice, "negro");
         camino.remove(camino.size()-1);
     }
 
@@ -200,14 +202,14 @@ public class GrafoDirigido<T> implements Grafo<T> {
 
         while (vertices.hasNext()) {
               int vAct = vertices.next();
-              this.listVerticesBFS.put(vAct, "blanco");
+              this.visitedHashMap.put(vAct, "blanco");
         }
 
         vertices = this.obtenerVertices();
 
         while (vertices.hasNext()) {
               int vActual = vertices.next();
-              if (this.listVerticesBFS.get(vActual) == "blanco") {
+              if (this.visitedHashMap.get(vActual) == "blanco") {
                     caminoExistenteEntreVertices(vActual, v, camino, solucion);
               }
         }
@@ -216,7 +218,7 @@ public class GrafoDirigido<T> implements Grafo<T> {
 
     private void caminoExistenteEntreVertices(int act, int v, ArrayList<Integer> camino, ArrayList<Integer> solucion) {
         camino.add(act);
-        this.listVerticesBFS.put(act, "amarillo");
+        this.visitedHashMap.put(act, "amarillo");
 
         if(act == v){
             if(!solucion.contains(camino.get(0))){
@@ -227,13 +229,13 @@ public class GrafoDirigido<T> implements Grafo<T> {
             Iterator<Integer> adyacentes = this.obtenerAdyacentes(act);
             while (adyacentes.hasNext()) {
                     Integer adyAct = adyacentes.next();
-                    if (this.listVerticesBFS.get(adyAct) != "amarillo") {
+                    if (this.visitedHashMap.get(adyAct) != "amarillo") {
                         caminoExistenteEntreVertices(adyAct, v, camino, solucion);
                     }
                 }   
             }    
 
-        listVerticesBFS.put(act, "blanco"); // Desmarcar el vértice
+        visitedHashMap.put(act, "blanco"); // Desmarcar el vértice
         camino.remove(camino.size()-1);
     }
 
@@ -299,11 +301,13 @@ public class GrafoDirigido<T> implements Grafo<T> {
             while (adyacentes.hasNext()) {
                     Integer ady = adyacentes.next();
                     if(!camino.contains(ady) && ady != i){
-                        darConexion(ady, b, i, camino, solucion);
+                       if(darConexion(ady, b, i, camino, solucion)){
+                            return true;
+                       }
                     }
-            }
-            camino.remove(camino.size()-1);
+                }
         }
+        camino.remove(camino.size()-1);
         return false;
     }
 
@@ -321,14 +325,14 @@ public class GrafoDirigido<T> implements Grafo<T> {
 
         while (vertices.hasNext()){
             int v = vertices.next();
-            this.listVerticesBFS.put(v, "blanco");
+            this.visitedHashMap.put(v, "blanco");
         }
 
         vertices = this.obtenerVertices();
 
         while(vertices.hasNext()){
             int v = vertices.next();
-            if (this.listVerticesBFS.get(v) == "blanco"){
+            if (this.visitedHashMap.get(v) == "blanco"){
                  BFSvisit(v,d,camino,solucion);
             }
         }
@@ -337,7 +341,7 @@ public class GrafoDirigido<T> implements Grafo<T> {
 
     private void BFSvisit(int v, int d, ArrayList<Integer> camino, ArrayList<Integer> solucion) {
         ArrayList<Integer>cola=new ArrayList<>();
-        this.listVerticesBFS.replace(v,"amarillo");
+        this.visitedHashMap.replace(v,"amarillo");
         cola.add(v);
         Iterator<Integer>adyacentes;
 
@@ -347,9 +351,9 @@ public class GrafoDirigido<T> implements Grafo<T> {
                 cola.remove(0);
                 while (adyacentes.hasNext()){
                     int ady = adyacentes.next();
-                    if (this.listVerticesBFS.get(ady) == "blanco"){
+                    if (this.visitedHashMap.get(ady) == "blanco"){
                         cola.add(ady);
-                        this.listVerticesBFS.replace(ady, "amarillo");
+                        this.visitedHashMap.replace(ady, "amarillo");
                     }
                 }
         }
@@ -380,14 +384,15 @@ public class GrafoDirigido<T> implements Grafo<T> {
             Iterator<Integer> adyacentes = this.obtenerAdyacentes(act);
             while (adyacentes.hasNext()) {
                     Integer adyAct = adyacentes.next();
-                    if(!camino.contains(adyAct) && this.listVerticesBFS.get(adyAct) != "rojo"){
+                    if(!camino.contains(adyAct) && this.visitedHashMap.get(adyAct) != "rojo"){
                         if (encontrarCamino(adyAct, v2, camino, solucion)) {
                             return true;
                         }
                     }
                 }
-                camino.remove(camino.size()-1);
+                
            }
+           camino.remove(camino.size()-1);
         return false;
     }
 
@@ -415,8 +420,8 @@ public class GrafoDirigido<T> implements Grafo<T> {
             while (ciudadesAdyacentes.hasNext()) {
                 Integer ciudadActual = ciudadesAdyacentes.next();
                 if(!camino.contains(ciudadActual)) {
-                    if (this.listVerticesBFS.get(origen).equals("Las Flores") &&
-                            this.listVerticesBFS.get(ciudadActual).equals("Rauch")) {
+                    if (this.visitedHashMap.get(origen).equals("Las Flores") &&
+                            this.visitedHashMap.get(ciudadActual).equals("Rauch")) {
                             continue;
                     }
                     caminosBairesTandil(ciudadActual, tandil, camino, caminosSolucion);
@@ -440,5 +445,70 @@ public class GrafoDirigido<T> implements Grafo<T> {
     la secuencia de tareas [0, 2, 5, 6, 10], ya que su tiempo de ejecución es la duración de cada
     tarea más el tiempo de espera entre cada par de tareas: 70 horas. */
 
-    
+    public ArrayList<Integer> secuenciaEjecucionTareas(GrafoDirigido<T> tareas){
+        ArrayList<Integer> secuenciaFinal = new ArrayList<Integer>();
+        ArrayList<Integer> secuenciaPosible = new ArrayList<Integer>();
+       
+        Iterator<Integer> verticesTareas = tareas.obtenerVertices();
+
+        while (verticesTareas.hasNext()) {
+                int v = verticesTareas.next();
+                this.visitedHashMap.put(v, "white");
+        }
+
+        verticesTareas = tareas.obtenerVertices();
+
+        while (verticesTareas.hasNext()) {
+                int v = verticesTareas.next();
+                if(this.visitedHashMap.get(v).equals("white")){
+                    secuenciaEjecucionTareas(v, tareas, secuenciaFinal, secuenciaPosible);
+                }
+        }
+
+        return secuenciaFinal;
+    }
+    private void secuenciaEjecucionTareas(int t, GrafoDirigido tareas, ArrayList<Integer> secuenciaFinal, ArrayList<Integer> secuenciaPosible) {
+        secuenciaPosible.add(t);
+        this.visitedHashMap.put(t, "yellow");
+        Iterator<Integer> tareasDependientes = tareas.obtenerAdyacentes(t);
+
+        if(!tareasDependientes.hasNext()){
+            if(secuenciaFinal.isEmpty()){
+                secuenciaFinal.addAll(secuenciaPosible);
+            }
+            else{
+                int tiempoSecPos = tiempoEjecucionTotal(secuenciaPosible);
+                int tiempoSecFin = tiempoEjecucionTotal(secuenciaFinal);
+                if(tiempoSecPos > tiempoSecFin){
+                    secuenciaFinal.clear();
+                    secuenciaFinal.addAll(secuenciaPosible);
+                }
+            }
+        }
+        else{
+            while (tareasDependientes.hasNext()) {
+                    int tDependiente = tareasDependientes.next();
+                    if(this.visitedHashMap.get(tDependiente).equals("white")){
+                        secuenciaEjecucionTareas(tDependiente, tareas, secuenciaFinal, secuenciaPosible);
+                    }
+            }   
+        }
+        this.visitedHashMap.put(t, "black");
+        secuenciaPosible.remove(secuenciaPosible.size()-1);
+    }
+
+    private int tiempoEjecucionTotal(ArrayList<Integer> secuenciaPosible) {
+        int tiempoEjecucion = 0;
+        for (Integer v : secuenciaPosible) {
+            tiempoEjecucion += secuenciaPosible.get(v); //el "id" de la tarea equivale a su tiempo de ejecucion
+             ArrayList<Arco<T>> arcosSecuencia = this.vertexHashMap.get(v);
+             for(Arco<T> a : arcosSecuencia){
+                if(a.getVerticeDestino() == secuenciaPosible.get(v + 1)){
+                    tiempoEjecucion += a.getPeso();
+                    break;
+                }
+             }
+        }
+        return tiempoEjecucion;
+    }
 }
