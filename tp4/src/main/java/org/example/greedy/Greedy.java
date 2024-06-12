@@ -7,6 +7,8 @@ import java.util.Iterator;
 import org.example.Arco;
 import org.example.Grafo;
 import org.example.GrafoDirigido;
+import org.example.backtracking.Casilla;
+import org.example.backtracking.Estado;
 
 public class Greedy {
 
@@ -297,10 +299,38 @@ movimientos válidos desde una celda son arriba, abajo, derecha e izquierda, un 
 pasar dos veces por una misma celda, y siempre que nos movemos de una celda C1 a una celda C2,
 el valor de la celda C2 debe ser mayor al valor de la celda C1. Por ejemplo, si estoy en una celda
 con valor 10, no puedo ir a una celda de valor 8, pero si puedo ir a una de valor 12.
-Se pide plantear un algoritmo mediante estrategia Greedy
+Se pide plantear un algoritmo mediante estrategia Greedy*/
 
-a) ¿Cuál sería la estrategia Greedy que seguiría?.
+public ArrayList<Casilla> caminoMayorCostoEnMatrizNumerica(Casilla origen, Casilla destino){
+    ArrayList<Casilla> camino = new ArrayList<>();
+    Estado e = new Estado();
+    Integer costoFinal = 0;
+    costoFinal += origen.getValor();
+    camino.add(origen);
 
-b) Escriba un pseudo-java que lo resuelva mediante la estrategia Greedy */
+    while (origen != destino) {
+          Casilla sCasilla = e.seleccionarCasillaVecinaConMayorValor(origen);//metodo que devuelve la casilla vecina a origen de mayor valor.
+          if (esFactible(e, camino, sCasilla, origen)) {//comprueba que a la siguiente a la que me mueva no este ya en el camino y que no sea menor a la casilla actual.
+                camino.add(sCasilla);
+                costoFinal += sCasilla.getValor();
+                origen = sCasilla;
+          }
+          else{
+            System.out.println("No es posible seguir avanzando con el origen dado.");
+            break;
+          }
+    }
+    System.out.println("costo final camino mas caro: " + costoFinal);
+    return camino;
+}
+
+private boolean esFactible(Estado e, ArrayList<Casilla> camino, Casilla sCasilla, Casilla actual) {
+
+    if (!camino.contains(sCasilla) && sCasilla.getValor() > actual.getValor()) {
+        return true;
+    }
+
+    return false;
+}
 
 }

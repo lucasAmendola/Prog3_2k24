@@ -451,4 +451,9 @@ public class Estado {
         throw new UnsupportedOperationException("Unimplemented method 'nuevoSubConjuntoActual'");
     }
 
+    public Casilla seleccionarCasillaVecinaConMayorValor(Casilla origen) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'seleccionarCasillaVecinaConMayorValor'");
+    }
+
 }
